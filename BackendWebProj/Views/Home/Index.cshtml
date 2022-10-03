@@ -1,0 +1,139 @@
+﻿
+<script type='text/javascript'>
+
+    $(function(){
+
+        ReadData();
+    });
+
+    function ReadData() {
+
+        $.ajax({
+            type: 'GET',
+            url: 'https://localhost:7123/api/Employ/Getdata',
+            dataType: 'json',
+            //cache: false,
+            //data: { 'Name': name, 'Price': price },
+            success: function (data) {
+                var content = '';
+                for (var x in data) {
+                    content += "<tr>";
+                    content += "<td><input type='hidden' name='id' value='"+ data[x].id + "' />";
+                    content += "<input type='text' name='name' value='" + data[x].name + "' /></td>";
+
+                    content += "<td><input type='text' name='birthday' value='" + data[x].dateOfBirthString + "' /></td>";
+                    content += "<td><input type='number' name='salary' value='" + data[x].salary + "' /></td>";
+                    content += "<td><input type='text' name='address' value='" + data[x].address + "' /></td>";
+                    content += "</tr>";
+
+                }
+
+                $(".mainTable").find("tbody").append(content);
+            },
+            error: function (msg) {
+                alert('something wrong');
+            }
+
+        });
+    }
+
+    function SaveData() {
+
+        var thisForm = $("form[name='thisForm']");
+        console.log(thisForm);
+
+
+
+        var count = 0
+        thisForm.find("tbody").find("tr").each(function(){
+
+            var inputParameterName = "editEmploys[" + count + "].";
+
+            var id = $(this).find("[name='id']");
+            id.attr("name",inputParameterName + "id");
+
+            var name = $(this).find("[name='name']");
+            name.attr("name",inputParameterName + "name");
+
+            var dateOfBirthString = $(this).find("[name='dateOfBirthString']");
+            id.attr("name",inputParameterName + "dateOfBirthString");
+
+            var salary = $(this).find("[name='salary']");
+            id.attr("name",inputParameterName + "salary");
+
+            var address = $(this).find("[name='address']");
+            id.attr("name",inputParameterName + "address");
+
+            count += 1;
+        });
+
+
+         $.ajax({
+            type: 'POST',
+            url: 'https://localhost:7123/api/Employ/SaveData',
+            //url: '@Url.Action("SaveData","Home")',
+            dataType: 'json',
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({
+                editEmploys : FormDataSerializeJsonString($("form[name='thisForm']"))
+            }),
+            success: function (data) {
+                //var content = '';
+                //for (var x in data) {
+                //    content += "<tr>";
+                //    content += "<td><input type='hidden' name='id' value='"+ data[x].id + "' />";
+                //    content += "<input type='text' name='name' value='" + data[x].name + "' /></td>";
+
+                //    content += "<td><input type='text' name='birthday' value='" + data[x].dateOfBirthString + "' /></td>";
+                //    content += "<td><input type='number' name='salary' value='" + data[x].salary + "' /></td>";
+                //    content += "<td><input type='text' name='address' value='" + data[x].address + "' /></td>";
+                //    content += "</tr>";
+
+                //}
+
+                //$(".mainTable").find("tbody").append(content);
+            },
+            error: function (msg) {
+                //alert(msg);
+                console.log(msg);
+            }
+        });
+
+    }
+
+    function AddRow()
+    {
+        var sampleTr = $(".SampleTr").clone().removeAttr("style").removeClass("SampleTr");
+
+        $(".mainTable").find("tbody").append(sampleTr);
+    }
+</script>
+
+
+<h2>範例</h2>
+
+<div>
+    <form name="thisForm">
+        <input type="button" name="btnUpdate" class="btn btn-primary" value="Update" />
+        <input type="button" name="btnAdd" class="btn btn-info" value="Add" onclick="AddRow()" />
+        <input type="button" name="btnSave" class="btn btn-danger" value="Save" onclick="SaveData()" />
+        <table class="table table-striped jambo_table bulk_action mainTable">
+            <thead>
+                <tr style="display:none" class="SampleTr">
+                    <td><input type="hidden" name="id" value="0" /><input type="text" name="name" /></td>
+                    <td><input type="text" name="dateOfBirthString" /></td>
+                    <td><input type="number" name="salary" /></td>
+                    <td><input type="text" name="address" /></td>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td>Birthday</td>
+                    <td>Salary</td>
+                    <td>Address</td>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </form>
+</div>
