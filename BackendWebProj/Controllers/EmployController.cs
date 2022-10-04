@@ -25,8 +25,10 @@ namespace BackendWebProj.Controllers
 
         [HttpPost]
         [Route("SaveData")]
-        public async Task<string> SaveData(List<Employ> editEmploys)
+        public async Task<string> SaveData([FromBody]List<Employ> editEmploys)
         {
+            string result = await employRepository.SaveEntity(editEmploys);
+
             IQueryable<Employ> employs = employRepository.GetEntitiesQ();
             return StringHelper.ConvertObjectToJsonString(employs);
         }

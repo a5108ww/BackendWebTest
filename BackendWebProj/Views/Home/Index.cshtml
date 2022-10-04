@@ -8,6 +8,10 @@
 
     function ReadData() {
 
+        var thisForm = $("form[name='thisForm']");
+        var trs = thisForm.find("tbody").find("tr");
+        trs.remove();
+
         $.ajax({
             type: 'GET',
             url: 'https://localhost:7123/api/Employ/Getdata',
@@ -21,7 +25,7 @@
                     content += "<td><input type='hidden' name='id' value='"+ data[x].id + "' />";
                     content += "<input type='text' name='name' value='" + data[x].name + "' /></td>";
 
-                    content += "<td><input type='text' name='birthday' value='" + data[x].dateOfBirthString + "' /></td>";
+                    content += "<td><input type='text' name='dateOfBirth' value='" + data[x].dateOfBirthString + "' /></td>";
                     content += "<td><input type='number' name='salary' value='" + data[x].salary + "' /></td>";
                     content += "<td><input type='text' name='address' value='" + data[x].address + "' /></td>";
                     content += "</tr>";
@@ -40,58 +44,42 @@
     function SaveData() {
 
         var thisForm = $("form[name='thisForm']");
-        console.log(thisForm);
-
-
+        var trs = thisForm.find("tbody").find("tr");
 
         var count = 0
-        thisForm.find("tbody").find("tr").each(function(){
+       
+        var employs = new Array();
+        trs.each(function () {
+            
+            var id = $(this).find("[name='id']").val();
+            var name = $(this).find("[name='name']").val();
+            var dateOfBirthString = $(this).find("[name='dateOfBirth']").val();
+            var salary = $(this).find("[name='salary']").val();
+            var address = $(this).find("[name='address']").val();
 
-            var inputParameterName = "editEmploys[" + count + "].";
+            console.log(dateOfBirthString);
 
-            var id = $(this).find("[name='id']");
-            id.attr("name",inputParameterName + "id");
+            var employ = {};
+            employ.id = id;
+            employ.name = name;
+            employ.dateOfBirth = dateOfBirthString;
+            employ.salary = salary;
+            employ.address = address;
 
-            var name = $(this).find("[name='name']");
-            name.attr("name",inputParameterName + "name");
-
-            var dateOfBirthString = $(this).find("[name='dateOfBirthString']");
-            id.attr("name",inputParameterName + "dateOfBirthString");
-
-            var salary = $(this).find("[name='salary']");
-            id.attr("name",inputParameterName + "salary");
-
-            var address = $(this).find("[name='address']");
-            id.attr("name",inputParameterName + "address");
-
-            count += 1;
+            employs.push(employ);
         });
 
+        var serializeValue = JSON.stringify(employs);
 
          $.ajax({
             type: 'POST',
             url: 'https://localhost:7123/api/Employ/SaveData',
-            //url: '@Url.Action("SaveData","Home")',
             dataType: 'json',
-            contentType: "application/json;charset=utf-8",
-            data: JSON.stringify({
-                editEmploys : FormDataSerializeJsonString($("form[name='thisForm']"))
-            }),
+            contentType: "application/json",
+
+            data: serializeValue,
             success: function (data) {
-                //var content = '';
-                //for (var x in data) {
-                //    content += "<tr>";
-                //    content += "<td><input type='hidden' name='id' value='"+ data[x].id + "' />";
-                //    content += "<input type='text' name='name' value='" + data[x].name + "' /></td>";
-
-                //    content += "<td><input type='text' name='birthday' value='" + data[x].dateOfBirthString + "' /></td>";
-                //    content += "<td><input type='number' name='salary' value='" + data[x].salary + "' /></td>";
-                //    content += "<td><input type='text' name='address' value='" + data[x].address + "' /></td>";
-                //    content += "</tr>";
-
-                //}
-
-                //$(".mainTable").find("tbody").append(content);
+                ReadData();
             },
             error: function (msg) {
                 //alert(msg);
@@ -114,14 +102,14 @@
 
 <div>
     <form name="thisForm">
-        <input type="button" name="btnUpdate" class="btn btn-primary" value="Update" />
+        <input type="button" name="btnUpdate" class="btn btn-primary" value="Update" onclick="ReadData()" />
         <input type="button" name="btnAdd" class="btn btn-info" value="Add" onclick="AddRow()" />
         <input type="button" name="btnSave" class="btn btn-danger" value="Save" onclick="SaveData()" />
         <table class="table table-striped jambo_table bulk_action mainTable">
             <thead>
                 <tr style="display:none" class="SampleTr">
                     <td><input type="hidden" name="id" value="0" /><input type="text" name="name" /></td>
-                    <td><input type="text" name="dateOfBirthString" /></td>
+                    <td><input type="text" name="dateOfBirth" /></td>
                     <td><input type="number" name="salary" /></td>
                     <td><input type="text" name="address" /></td>
                 </tr>

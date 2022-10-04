@@ -1,4 +1,5 @@
 using BackendWebProj.Context;
+using BackendWebProj.Filters;
 using BackendWebProj.Models.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,13 @@ services.AddDbContext<BackendWebContext>(options => options.UseSqlServer(builder
 
 services.AddScoped<EmployRepository>();
 services.AddRazorPages().AddRazorRuntimeCompilation();
+
+//¥[¤JFilter
+services.AddMvc(options =>
+{
+    options.Filters.Add<ActionFilter>();
+
+});
 
 var app = builder.Build();
 

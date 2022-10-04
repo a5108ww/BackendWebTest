@@ -20,28 +20,61 @@ namespace BackendWebProj.Models.Repository
             return db.Employ.Where(m => !m.removed && m.id == id).FirstOrDefault();
         }
 
-        public async Task<string> SaveEntity(Employ employ)
+        public async Task<string> SaveEntity(List<Employ> employs)
         {
-            Employ editEmploy = employ;
+            string result = "";
 
-            if (employ != null && employ.id > 0)
+            try
             {
-                editEmploy = GetById(employ.id);
+                if (employs != null && employs.Count > 0)
+                {
+                    List<Employ> editEmploys = new List<Employ>();
+                    foreach (Employ employ in employs)
+                    {
+                        result = CheckModelIsOk(employ);
+                        if (string.IsNullOrWhiteSpace(result))
+                        {
+                            DateTime dateOfBirth = new DateTime();
+                            if(DateTime.TryParse(employ.dateOfBirthString, out dateOfBirth))
+                            {
+                                employ.dateOfBirth = dateOfBirth;
+                            }
+
+                            if (employ.id > 0)
+                            {
+                                Employ tempEmploy = GetById(employ.id);
+
+                                tempEmploy.name = employ.name;
+                                tempEmploy.dateOfBirth = employ.dateOfBirth;
+                                tempEmploy.salary = employ.salary;
+                                tempEmploy.address = employ.address;
+
+                                editEmploys.Add(tempEmploy);
+                            }
+                            else
+                            {
+                                editEmploys.Add(employ);
+                            }
+                        }
+                    }
+
+                    if(editEmploys != null && editEmploys.Count > 0)
+                    {
+                       await SaveAsync(editEmploys);
+                    }
+                }
             }
-
-            editEmploy.name = employ.name;
-            editEmploy.dateOfBirth = employ.dateOfBirth;
-            editEmploy.salary = employ.salary;
-            editEmploy.address = employ.address;
-
-            string result = CheckModelIsOk(editEmploy);
-
-            if (!string.IsNullOrWhiteSpace(result))
+            catch(Exception ex)
             {
-                await SaveAsync(editEmploy);
+                result = ex.Message;
             }
 
             return result;
+        }
+
+        public async Task<string> SaveEntity(Employ employ)
+        {
+            return await SaveEntity(new List<Employ>() { employ });
         }
 
         public string CheckModelIsOk(Employ employ)
